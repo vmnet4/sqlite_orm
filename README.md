@@ -21,7 +21,7 @@ SQLite ORM light header only library for modern C++
 * **No raw string queries**
 * **Intuitive syntax**
 * **Comfortable interface - one code line per single query**
-* **Built with modern C++14 features (no macros and external scripts)**
+* **Built with modern C++17 features (no macros and external scripts)**
 * **CRUD support**
 * **Pure select query support**
 * **UNION, EXCEPT and INTERSECT support**
@@ -758,5 +758,5 @@ Or just put `include/sqlite_orm/sqlite_orm.h` into you folder with headers. Also
 
 # Requirements
 
-* C++14 compatible compiler (not C++11 cause of templated lambdas in the lib).
+* C++17 compatible compiler (not C++11 cause of templated lambdas in the lib, not C++14 because of use of std::optional).
 * libsqlite3 linked to your binary
