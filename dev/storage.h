@@ -737,6 +737,38 @@ namespace sqlite_orm {
                 }
             }
 
+#ifdef SQLITE_ORM_OPTIONAL_SUPPORTED
+            template<class T, class... Ids>
+            std::string string_from_expression(const get_optional_t<T, Ids...> &g, bool /*noTableName*/) const {
+                auto &impl = this->get_impl<T>();
+                std::stringstream ss;
+                ss << "SELECT ";
+                auto columnNames = impl.table.column_names();
+                for(size_t i = 0; i < columnNames.size(); ++i) {
+                    ss << "\"" << columnNames[i] << "\"";
+                    if(i < columnNames.size() - 1) {
+                        ss << ",";
+                    }
+                    ss << " ";
+                }
+                ss << "FROM '" << impl.table.name << "' WHERE ";
+                auto primaryKeyColumnNames = impl.table.primary_key_column_names();
+                if(!primaryKeyColumnNames.empty()) {
+                    for(size_t i = 0; i < primaryKeyColumnNames.size(); ++i) {
+                        ss << "\"" << primaryKeyColumnNames[i] << "\""
+                           << " = ? ";
+                        if(i < primaryKeyColumnNames.size() - 1) {
+                            ss << "AND ";
+                        }
+                        ss << ' ';
+                    }
+                    return ss.str();
+                } else {
+                    throw std::system_error(std::make_error_code(orm_error_code::table_has_no_primary_key_column));
+                }
+            }
+#endif // SQLITE_ORM_OPTIONAL_SUPPORTED
+
             template<class T, bool by_ref>
             std::string string_from_expression(const update_t<T, by_ref> &upd, bool /*noTableName*/) const {
                 auto &impl = this->get_impl<T>();
@@ -2167,6 +2199,22 @@ namespace sqlite_orm {
                 }
             }
 
+#ifdef SQLITE_ORM_OPTIONAL_SUPPORTED
+            template<class T, class... Args>
+            prepared_statement_t<get_all_optional_t<T, Args...>> prepare(get_all_optional_t<T, Args...> get) {
+                auto con = this->get_connection();
+                sqlite3_stmt *stmt;
+                auto db = con.get();
+                auto query = this->string_from_expression(get, false);
+                if(sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+                    return {std::move(get), stmt, con};
+                } else {
+                    throw std::system_error(std::error_code(sqlite3_errcode(db), get_sqlite_error_category()),
+                                            sqlite3_errmsg(db));
+                }
+            }
+#endif // SQLITE_ORM_OPTIONAL_SUPPORTED
+
             template<class... Args, class... Wargs>
             prepared_statement_t<update_all_t<set_t<Args...>, Wargs...>>
             prepare(update_all_t<set_t<Args...>, Wargs...> upd) {
@@ -2223,6 +2271,22 @@ namespace sqlite_orm {
                                             sqlite3_errmsg(db));
                 }
             }
+
+#ifdef SQLITE_ORM_OPTIONAL_SUPPORTED
+            template<class T, class... Ids>
+            prepared_statement_t<get_optional_t<T, Ids...>> prepare(get_optional_t<T, Ids...> g) {
+                auto con = this->get_connection();
+                sqlite3_stmt *stmt;
+                auto db = con.get();
+                auto query = this->string_from_expression(g, false);
+                if(sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+                    return {std::move(g), stmt, con};
+                } else {
+                    throw std::system_error(std::error_code(sqlite3_errcode(db), get_sqlite_error_category()),
+                                            sqlite3_errmsg(db));
+                }
+            }
+#endif // SQLITE_ORM_OPTIONAL_SUPPORTED
 
             template<class T, bool by_ref>
             prepared_statement_t<update_t<T, by_ref>> prepare(update_t<T, by_ref> upd) {

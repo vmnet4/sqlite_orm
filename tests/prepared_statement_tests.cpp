@@ -683,6 +683,90 @@ TEST_CASE("Prepared") {
             }
         }
     }
+    SECTION("get optional") {
+        {
+            auto statement = storage.prepare(get_optional<User>(1));
+            REQUIRE(get<0>(statement) == 1);
+            std::ignore = get<0>(static_cast<const decltype(statement) &>(statement));
+            testSerializing(statement);
+            SECTION("nothing") {
+                //..
+            }
+            /*SECTION("execute") {
+                {
+                    auto user = storage.execute(statement);
+                    REQUIRE(user);
+                    REQUIRE(*user == User{1, "Team BS"});
+                }
+                get<0>(statement) = 2;
+                REQUIRE(get<0>(statement) == 2);
+                {
+                    auto user = storage.execute(statement);
+                    REQUIRE(user);
+                    REQUIRE(*user == User{2, "Shy'm"});
+                }
+            }*/
+        }
+        //{
+        //    auto statement = storage.prepare(get_pointer<User>(2));
+        //    REQUIRE(get<0>(statement) == 2);
+        //    testSerializing(statement);
+        //    SECTION("nothing") {
+        //        //..
+        //    }
+        //    SECTION("execute") {
+        //        auto user = storage.execute(statement);
+        //        REQUIRE(user);
+        //        REQUIRE(*user == User{2, "Shy'm"});
+        //    }
+        //}
+        //{
+        //    auto statement = storage.prepare(get_pointer<User>(3));
+        //    testSerializing(statement);
+        //    SECTION("nothing") {
+        //        //..
+        //    }
+        //    SECTION("execute") {
+        //        auto user = storage.execute(statement);
+        //        REQUIRE(user);
+        //        REQUIRE(*user == User{3, "Maître Gims"});
+        //    }
+        //}
+        //{
+        //    auto statement = storage.prepare(get_pointer<User>(4));
+        //    testSerializing(statement);
+        //    SECTION("nothing") {
+        //        //..
+        //    }
+        //    SECTION("execute") {
+        //        auto user = storage.execute(statement);
+        //        REQUIRE(!user);
+        //    }
+        //}
+        //{
+        //    storage.replace(Visit{1, /*userId*/ 2, 1000});
+        //    auto statement = storage.prepare(get_pointer<UserAndVisit>(2, 1));
+        //    std::ignore = get<0>(static_cast<const decltype(statement) &>(statement));
+        //    std::ignore = get<1>(static_cast<const decltype(statement) &>(statement));
+        //    REQUIRE(get<0>(statement) == 2);
+        //    REQUIRE(get<1>(statement) == 1);
+        //    {
+        //        auto userAndVisit = storage.execute(statement);
+        //        REQUIRE(userAndVisit);
+        //        REQUIRE(userAndVisit->userId == 2);
+        //        REQUIRE(userAndVisit->visitId == 1);
+        //        REQUIRE(userAndVisit->description == "Glad you came");
+        //    }
+        //    {
+        //        get<0>(statement) = 3;
+        //        auto userAndVisit = storage.execute(statement);
+        //        REQUIRE(userAndVisit);
+        //        REQUIRE(userAndVisit->userId == 3);
+        //        REQUIRE(userAndVisit->visitId == 1);
+        //        REQUIRE(userAndVisit->description == "Shine on");
+        //    }
+        //}
+    }
     SECTION("update") {
         User user{2, "Stromae"};
         SECTION("by ref") {

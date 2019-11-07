@@ -14,3 +14,8 @@ __pragma(push_macro("min"))
 #endif  // defined(_MSC_VER)
 
 #include <ciso646>  //  due to #166
+
+// Enables support for std::optional if the compiler supports it
+#ifdef __cpp_lib_optional
+#define SQLITE_ORM_OPTIONAL_SUPPORTED
+#endif // __cpp_lib_optional 
