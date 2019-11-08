@@ -257,7 +257,12 @@ class TranslationUnit(object):
         self.amalgamation = amalgamation
         self.is_root = is_root
 
-        self.amalgamation.included_files.append(self.file_path)
+        # To make the logic Windows-safe, we ensure the filepath are formed with backslashes.
+        # The strategy is to split the path and filename and join them back.
+        head_tail = os.path.split(self.file_path)
+        osSafeFilePath = os.path.join( head_tail[0], head_tail[1] )
+
+        self.amalgamation.included_files.append(osSafeFilePath)
 
         actual_path = self.amalgamation.actual_path(file_path)
         if not os.path.isfile(actual_path):
